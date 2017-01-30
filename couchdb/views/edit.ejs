@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%=title%></title>
+        <script type="text/javascript" src="/../js/jquery-1.10.2.min.js"></script>
+        <link rel="stylesheet" href="/../css/style.css">
+    </head>
+<body>
+<form method="post" action="" id="the-form">
+
+<!-- Some simple validation, if data is undefined display simple error message-->
+<% if(typeof data == "undefined"){
+   %> <p>An error occured, please return to the home page</p>
+  
+  <%
+}else{%>
+   
+
+    <fieldset>
+         
+         <legend>Player Details</legend>
+         
+         <p> 
+         <label class="field" for="Username">Username: </label>
+         <input type="text" name="username" value="<%=data.username%>">
+         </p>         
+         
+         <p> 
+         <label class="field" for="Level">Level: </label>
+         <input type="text" name="level" value="<%=data.level%>">
+         </p>         
+         
+         <p>
+         <label class="field" for="Team">Team: </label>
+         <select form="the-form" name="team">
+              <option value="<%=data.team%>"><%=data.team%></option>
+              <option value="None">None</option>
+              <option value="Red">Red</option>
+              <option value="Green">Green</option>
+              <option value="Blue">Blue</option>
+              <option value="Gold">Gold</option>
+         </select>
+         </p> 
+
+         <p><label class="field" for="Trophy">Trophy: </label>
+          <input type="text" name="trophy" placeholder="add new trophy">
+         </p>
+        
+         <div class="page-data" style="text-decoration-color: red">
+         <ul class="err-area"></ul>
+         </div>
+
+         &nbsp; <input type="button" class="saveButton" value="Save" onClick="saveUser()">
+         &nbsp; <input type="button" class="deleteButton" value="Delete" onClick="deleteUser()">
+        
+
+       </fieldset>
+
+       <div class="datagrid">
+       <table>
+        <thead>
+            <tr>
+            <th>Trophy Name</th>
+            <th>Earned</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+
+        <%
+          <!-- if no trophy field in doc, data.trophy == undefined, change value from undefined to an empty string -->
+          var val=""
+          if(typeof data.trophy != "undefined"){
+           val = data.trophy;
+          }
+          <!-- if val ="", the data.trophy value is undefined and message is displayed saying no trophies -->
+           if(val =="") {%>
+             <tr>
+                <td colspan="5">no trophies</td>
+             </tr>
+            <%} 
+            else{<!--display name and date earned for each trophy-->
+              for (var j=0; j< data.trophy.length; j++){
+                    
+                  if(j%2){
+                    %>
+                    <tr> 
+                    <%}
+                  else{
+                  %>
+                    <tr class="alt">
+                  <%
+                    }%>
+                      <td><%=data.trophy[j].name%></td>
+                      <td><%=data.trophy[j].earned%></td>
+                    </tr>
+                    <%
+              }
+            }%>
+
+        </tbody>
+        </table>
+        </div>
+</form>
+ <script>
+    
+        function saveUser(){
+
+           $.ajax({
+            
+            url:"/api/user/<%=data.id%>",
+            type:"put",
+            data:$("#the-form").serialize(),
+            success:function(res){
+                window.location.href = '/api/user';
+                return false;
+            },
+            error:function(xhr, status, error){
+                
+                console.log(xhr.responseText);
+                var err = '';
+                $.each(JSON.parse(xhr.responseText) , function(i, item) {
+                   
+                     err +='<li>'+item.msg+'</li>';
+                });
+                $(".err-area").html(err);    
+                return false;
+            }
+            
+           });
+        }
+
+        function deleteUser(){
+    
+        $.ajax({
+            url:"/api/user/<%=data.id%>",
+            type: 'DELETE',
+            success: function(res) {
+                
+                window.location.href = '/api/user';
+                // window.location.reload();
+                return false;
+            },
+            error:function(xhr, status, error){
+            
+                console.log(xhr.responseText);
+                alert("Error deleting");
+                return false;
+            }
+        });
+    }
+    
+    </script>
+</body><%}%>
+</html>

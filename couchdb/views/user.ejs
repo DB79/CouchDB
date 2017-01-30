@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%=title%></title>
+        <script type="text/javascript" src="/../js/jquery-1.10.2.min.js"></script>
+        <link rel="stylesheet" href="/../css/style.css">
+    </head>
+<body>
+
+<div class="datagrid">
+    <table>
+       <thead><tr><th>Level</th><th>Username</th><th>No. Trophies</th><th>View Details</th></tr></thead>
+                       
+        <% if(data.length){ 
+
+        for(var i = 0;i < data.length;i++) { 
+        var val;
+        if(data[i].trophy === null){
+        val = 0;
+        } 
+        else{
+        val = data[i].trophy;
+        }
+
+        %>
+
+        <tbody>
+        <!-- Change background color for every second row -->
+        <%if(i%2){%>
+        <tr class="alt">
+        <%
+        }else{
+        %>
+        <tr>
+        <%
+        }%>
+        
+        <td><%=data[i].level%></td>
+        
+        <td><%=data[i].username%></td>
+        
+        <td><%=data[i].trophies%></td>
+        
+        <td>
+
+            <form action="/api/user/<%=data[i].id%>">
+              <input type="submit" value="Player Info." />
+            </form>                    
+        
+        </td>
+        </tr>
+    <% }
+    
+     }else{ %>
+         <tr>
+           
+            <td colspan="5">No Data</td>
+         
+         </tr>
+    <% } %>
+    </tobdy>
+                                      
+    </table>
+</div>
+
+<div>
+    <form method="post" action="" id="the-form">
+      
+    <fieldset>
+         
+         <legend>Add New Player</legend>
+        
+         <p><label class="field" for="Username">Username: </label>
+         <input type="text" name="username" class="textbox-300">
+         </p> 
+        
+        <!-- Hidden field which will set level to be 1 for all new players  -->
+         <input type="text" name="level" value="1" hidden="true">
+         
+         <p>
+         <label class="field" for="Team">Team: </label>
+         <select form="the-form" name="team">
+              <option value="None" selected="true">None</option>
+              <option value="Red">Red</option>
+              <option value="Green">Green</option>
+              <option value="Blue">Blue</option>
+              <option value="Gold">Gold</option>
+         </select>
+         </p> 
+
+         <input type="button" value="Save" class="saveButton" onClick="createUser()">
+
+         <div class="page-data" style="text-decoration-color: red">
+            <ul class="err-area"></ul>
+         </div>
+
+       </fieldset>
+    </form>
+</div>
+ 
+<div class="replication">
+<input type="button" name="repl" value="Replicate" onclick="replicateDb()">
+</div>
+
+
+<script>
+
+    function createUser(){
+        
+       $.ajax({
+        
+        url:"/api/user",
+        type:"post",
+        data:$("#the-form").serialize(),
+        success:function(res){
+            
+            window.location.reload();
+            return false;
+        },
+        error:function(xhr, status, error){
+            
+            console.log(xhr.responseText);
+            var err = '';
+            $.each(JSON.parse(xhr.responseText) , function(i, item) {
+               
+                 err +='<li>'+item.msg+'</li>';
+            });
+            $(".err-area").html(err);    
+            return false;
+        }
+        
+       });
+    }
+
+    function replicateDb(){
+      $.ajax({
+
+        url:"/api/replicate",
+        type:"post",
+        data: "",
+        success: function(res){
+          window.location.reload();
+          return  false;
+
+        },
+        error: function(xhr, status, error){
+          console.log(xhr.responseText);
+          var err='';
+          $.each(JSON.parse(xhr.responseText), function(i, item){
+            err += '<li>' + item.msg + '</li>';
+          });
+          $(".err-area").html(err);
+          return false;
+        }
+      });
+    }
+
+</script>
+</body>
+</html>
